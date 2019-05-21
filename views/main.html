@@ -1,0 +1,152 @@
+<html>
+<head>
+  <title>HOWATCH</title>
+  <meta name="theme-color" content="#f250af">
+  <link href="https://fonts.googleapis.com/css?family=Black+Han+Sans&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Bangers&display=swap" rel="stylesheet">
+  <link href='css/index.css' rel='stylesheet' type='text/css'>
+  <link href="https://fonts.googleapis.com/css?family=Nanum+Gothic&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+  <link rel='shortcut icon' href='fav.png'>
+</head>
+<body style="padding: 0px !important;">
+
+
+  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#coin-list" id='coin-list-btn' style="display: none;">
+  coin list
+  </button>
+
+
+  <div class="modal fade" id="coin-list" tabindex="-1" role="dialog" aria-labelledby="coin-list-label" aria-hidden="true" >
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="coin-list-label" style="font-size: 60px;font-family: 'Nanum Gothic', sans-serif;">코인목록</h5>
+        
+      </div>
+      <div class="modal-body">
+        
+
+        <div class="list-group" style="font-size: 30px;font-family: 'Nanum Gothic', sans-serif;">
+          <a href="javascript:update('btc');" class="list-group-item list-group-item-action" id='btc-str'>비트코인()</a>
+          <a href="javascript:update('eth');" class="list-group-item list-group-item-action" id='eth-str'>이더리움()</a>
+          <a href="javascript:update('xrp');" class="list-group-item list-group-item-action" id='xrp-str'>리플()</a>
+          <a href="javascript:update('bch');" class="list-group-item list-group-item-action" id='bch-str'>비트코인캐시()</a>
+          <a href="javascript:update('ltc');" class="list-group-item list-group-item-action" id='ltc-str'>라이트코인()</a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" style="font-size: 30px;font-family: 'Nanum Gothic', sans-serif;">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div style="padding:0px !important;">
+    <div style="font-size: 40px;position: absolute; top:50px; right:50px;border:1px black solid; padding: 18px;border-radius: 200px;color:#0d3375;" onclick="setting()"><i class="fas fa-wrench"></i></div>
+    <div style="position: absolute; top:30%;width: 100%;">
+  	<h1 class="big" style="font-size: 100px !important;" id=date>2019.05.22</h1>
+  	<h1 class="big" style="font-size: 200px !important;" id=time>11:11</h1>
+    </div>
+
+</div>
+
+</body>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+<script type="text/javascript">
+  var prcs={};
+  var curset='';
+  
+  function init(){
+    prcs['btc']=0;
+    prcs['eth']=0;
+    prcs['xrp']=0;
+    prcs['bch']=0;
+    prcs['ltc']=0;
+    update('btc');
+    $('#date').html(today_str());
+    setInterval(()=>{
+      update(curset);
+    },1000);
+  }
+
+
+
+
+  window.onload=init();
+  function update(coin)
+  {
+    curset=coin;
+    if(coin===undefined)return;
+    $.get('/api/update/'+coin,function(d,s) {
+        var o=d.body;
+        o=JSON.parse(o);
+        var prc=o.data.buy_price;
+        prcs[coin]=prc;
+        var prc_str_pos=$('#'+coin+'-str').html().indexOf('(');
+        var update_prc_str=$('#'+coin+'-str').html().substr(0,prc_str_pos);
+        update_prc_str=update_prc_str+'('+prc+'원)';
+        $('#'+coin+'-str').html(update_prc_str);
+        var timestr=timeparse(prc);
+        $('#time').html(timestr);
+
+      });  
+  }
+
+  function today_str()
+  {
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //January is 0!
+    var yyyy = today.getFullYear();
+
+    if(dd<10) {
+        dd='0'+dd
+    } 
+
+    if(mm<10) {
+        mm='0'+mm
+    } 
+
+    today = yyyy+'.'+mm+'.'+dd;
+    return today;
+  }
+
+
+  function timeparse(prc){
+    if(prc.length>=4)
+    {
+      return prc[0]+prc[1]+":"+prc[2]+prc[3];
+    }
+    else if(prc.length>=3)
+    {
+      return prc[0]+prc[1]+":"+prc[2]+"0";
+    }
+    else if(prc.length>=2)
+    {
+      return prc[0]+prc[1]+":00";
+    }else if(prc.length>=1)
+    {
+      return prc[0]+"0:00";
+    }
+
+    //alert(prc.length);
+    return "00:00";
+  }
+
+  function setting()
+  {
+    $('#coin-list-btn').click();
+  }
+  
+
+</script>
+</html>
